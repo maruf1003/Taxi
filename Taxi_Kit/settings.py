@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'taxi',
     'rest_framework',
     'django_filters',
+    'chat',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -191,3 +193,11 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'marufkulmatov10@gmail.com'
 EMAIL_HOST_PASSWORD = 'azfccpeswxkwurpt'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
+
+ASGI_APPLICATION = "Taxi_Kit.asgi.application"

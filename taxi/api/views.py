@@ -2,7 +2,7 @@ from django.core.files.storage import FileSystemStorage
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from taxi.api.serializer import UserSerializer
+from taxi.api.serializer import *
 from taxi.models import CustomUser
 from rest_framework_jwt.settings import api_settings
 from django.conf import settings
@@ -11,8 +11,6 @@ import random
 
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER  # token uchun
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
-
-
 
 
 # User log in (avtorizatsiya 1-martta royxatdan otganda)
@@ -60,6 +58,37 @@ def save_registr(request):
             "error": "Key error"
         }
 
+    return Response(res)
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def accept_confirmation(request):  # user tomonidan code orqali tasdiqlash
+    try:
+        sms_code = request.data['sms_code']
+        username = request.data['username']
+        user = CustomUser.objects.filter(username=username).first()
+        if user and str(user.sms_code) == str(sms_code):
+            payload = jwt_payload_handler(user)
+            token = jwt_encode_handler(payload)
+            user.save()
+            res = {
+                "status": 1,
+                "msg": "successful",
+                "user": UserSerializer(user, many=False, context={"request": request}).data,
+                "token": token
+            }
+        else:
+            res = {
+                "status": 0,
+                "msg": "EROR",
+            }
+        return Response(res)
+    except KeyError:
+        res = {
+            "status": 0,
+            "error": "Key error"
+        }
     return Response(res)
 
 
@@ -150,3 +179,21 @@ def update_password(request):
         }
 
     return Response(res)
+
+
+# @api_view(["GET"])
+# @permission_classes([IsAuthenticated])    # zakazdan song xaydovchining dannylarini korado
+# def driver_view(request):
+#     user_id = request.GET.get("user_id")
+#     user = CustomUser.objects.filter(pk=user_id).first()
+#     if user:
+#         res = {
+#             "status": 1,
+#             "user": User_driverSerializer(user, many=False).data,
+#         }
+#     else:
+#         res = {
+#             "status": 0,
+#             "msg": "Key error"
+#         }
+#     return Response(res)
