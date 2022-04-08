@@ -9,23 +9,8 @@ class UserSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class CustomUserMessageSerializer(serializers.ModelSerializer):
-    class Meta:
+class CustomUserMessageSerializer(serializers.ModelSerializer):   # chatda ikki user yozishganda kim tomonidan yozishayotganini korsatish uchun
+    class Meta:                                                    # ahuning uchun id va username qaytarilyapti
         model = CustomUser
         fields = ["id", "username"]
-#
-# class UserCustomSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = CustomUser
-#         fields = "__all__"
 
-#
-# class User_driverSerializer(serializers.ModelSerializer):  # zakazdan song xaydovchining massiv dagi dannylarini koradi
-#     class Meta:
-#         model = CustomUser
-#         fields = ['username', 'fullname', 'avatar', ]
-#
-# # class User_passengerSerializer(serializers.ModelSerializer):
-# #     class Meta:
-# #         model = CustomUser
-# #         fields = ['username', 'fullname', 'avatar', ]

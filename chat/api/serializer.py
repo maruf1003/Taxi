@@ -39,4 +39,5 @@ class MessageSerializer(serializers.ModelSerializer):
         fields = ['id', 'user_message', 'created_at', 'updated_at', 'text', 'thread', ]
 
     def get_user_message(self, obj):
-        return CustomUserMessageSerializer(obj.user, many=False, context={"request": self.context['request']}).data
+        return CustomUserMessageSerializer(obj.user, many=False, context={"request": self.context[
+            'request']}).data  # chatda ikki user yozishganda kim tomonidan yozishayotganini korsatish uchun

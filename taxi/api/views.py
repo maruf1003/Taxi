@@ -1,4 +1,5 @@
 from django.core.files.storage import FileSystemStorage
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -8,58 +9,71 @@ from rest_framework_jwt.settings import api_settings
 from django.conf import settings
 from django.core.mail import send_mail
 import random
+from django.core.mail import EmailMessage
 
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER  # token uchun
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 
 
+
+def send_sms(mail, text):
+    email = EmailMessage('Veri', text,from_email="marufkulmatov10@gmail.com", to=[mail])
+    email.send()
 # User log in (avtorizatsiya 1-martta royxatdan otganda)
-@api_view(["POST"])
-@permission_classes([AllowAny])  # ([HammagaRuxsat])
-def save_registr(request):
+@api_view(['POST'])
+@permission_classes([AllowAny, ])
+def save_register(request):
     try:
-        email = request.POST["email"]
-        password = request.POST["password"]
-        username = request.POST["username"]
-        user = CustomUser.objects.filter(username=username).first()  # bu yerda unikal ma'lumot tekshiriladi
-        if user:  # agar user kiritgan email'ga o'xshagan email bolsa-
+        username = request.data.get('username')
+        email = request.data.get('email')
+        password = request.data.get('password')
+        if not login_view:
             res = {
-                "status": 0,
-                "error": "User alerdy exits"  # -unda bunday user bor degan yozuv qaytaramiz
-            }  # bolmasam-
+                'status': 0,
+                'msg': 'Login empty',
+            }
             return Response(res)
-        user = CustomUser.objects.create(  # -yangi user yaratamiz
-            email=email,
-            # aslida username unikal bolishi kerak
-            username=username,
-        )
-        user.set_password(password)  # password tekshirish (password=password)
-        sms_code = random.randint(1000, 9999)  # registratsiyadan song tasdiqlash uchun yuboriladigan cod
+
+        user = CustomUser.objects.filter(username=username).first()
+        sms_code = random.randint(1000, 9999)
+
+        if not user:
+            user = CustomUser.objects.create(
+                username=username,
+                email=email,
+            )
+        elif user:
+            send_sms(email, "Sizning tasdiqlash codingiz: " + str(sms_code))
+
+            res = {
+                'msg': 'User exits',
+                'status': 0,
+            }
+            return Response(res)
+        user.set_password(str(password))
         user.sms_code = sms_code
+        user.email = email
         user.save()
+        send_sms(email, "Sizning tasdiqlash codingiz: " + str(sms_code))
 
-        # token yasash
-        payload = jwt_payload_handler(user)  # token uchun
-        token = jwt_encode_handler(payload)
-        send_mail("Taxi",
-                  "SIzning tasdiqlash kodingiz " + str(sms_code), settings.EMAIL_HOST_USER, [email],
-                  fail_silently=False)
-        res = {
-            "status": 1,
-            "msg": "sms send",
-            # "user": UserSerializer(user, many=False).data,  # user ma'lumotlari qaytarilayapti
-            # "token": token
-        }
-        return Response(res)
-
+        if user:
+            result = {
+                'status': 1,
+                'msg': 'Sms sended',
+            }
+            return Response(result, status=status.HTTP_200_OK)
+        else:
+            res = {
+                'status': 0,
+                'msg': 'Can not authenticate with the given credentials or the account has been deactivated'
+            }
+            return Response(res, status=status.HTTP_403_FORBIDDEN)
     except KeyError:
         res = {
-            "status": 0,
-            "error": "Key error"
+            'status': 0,
+            'msg': 'Please set all reqiured fields'
         }
-
-    return Response(res)
-
+        return Response(res)
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
@@ -179,7 +193,6 @@ def update_password(request):
         }
 
     return Response(res)
-
 
 # @api_view(["GET"])
 # @permission_classes([IsAuthenticated])    # zakazdan song xaydovchining dannylarini korado
