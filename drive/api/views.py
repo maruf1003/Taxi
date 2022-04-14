@@ -1,21 +1,44 @@
+from django.core.files.storage import FileSystemStorage
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from drive.api.serializer import *
 from drive.models import *
 import math
+from django.contrib.gis.db.models.functions import GeometryDistance
 
 
 #
 # jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER  # token uchun
 # jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 #
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def set_location(request):
+    x1 = request.data["x1"]
+    y1 = request.data["y1"]
+    driver_id = request.data["driver_id"]
 
-from django.contrib.gis.db.models.functions import GeometryDistance
+    ref_location = Point(float(x1), float(y1), srid=4326)
+    driver = Driver.objects.filter(pk=driver_id).first()
+    if driver:
+        driver.longitude = x1,
+        driver.latitude = y1,
+        driver.point = ref_location,
+        driver.save()
+        Location.object.create(
+            longitude=x1,
+            latitude=y1,
+            point=ref_location,
+            driver=driver
+        ).save()
+    return Response({"status": 1})
+
+
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def get_drivers(request):
-    qs = Location.objects.all()
+    qs = Driver.objects.all()
     x1 = request.data["x1"]
     y1 = request.data["y1"]
 
@@ -23,7 +46,8 @@ def get_drivers(request):
 
     qs = qs.annotate(distance=GeometryDistance("point", ref_location)).order_by('distance')
 
-    return Response({"status":1, "data":LocationSerializers(qs, many=True, context={'request':request}).data})
+    return Response({"status": 1, "data": DriverSerializers(qs, many=True, context={'request': request}).data})
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -53,7 +77,7 @@ def order_creat(request):
         car_type = Car_type.objects.all()
         res = {
             "order": OrderCreatSerializers(order, many=False).data,
-            "car_type": Car_typeSerializers(car_type, many=True, context={"request":request,'langht': langht}).data,
+            "car_type": Car_typeSerializers(car_type, many=True, context={"request": request, 'langht': langht}).data,
             "langht": "%.7f" % langht,
 
         }
@@ -67,32 +91,60 @@ def order_creat(request):
     return Response(res)
 
 
-# @api_view(["POST"])
-# @permission_classes([IsAuthenticated])
-# def distance(request):
-#     try:
-#         x1 = request.data.get('x1')
-#         x2 = request.data.get('x2')
-#         y1 = request.data.get('y1')
-#         y2 = request.data.get('y2')
-#         x1 = float(x1)
-#         x2 = float(x2)
-#         y1 = float(y1)
-#         y2 = float(y2)
-#         if request.data.get != 0:
-#             langht = math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2) * 100
-#             res = {
-#                 "langht": "%.7f" % langht,
-#             }
-#         else:
-#             res = {
-#                 "msg": "kordinatalarni kiriting"
-#             }
-#         return Response(res)
-#
-#     except KeyError:
-#         res = {
-#             "status": 0,
-#             "error": "Key error"
-#         }
-#     return Response(res)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def tell_me(request):
+    try:
+        data_time = request.data.get('data_time')
+        place = request.data.get('place')
+        accident = request.data.get('accident')
+        driver_id = request.data.get('driver_id')
+        user_id = request.data.get('user_id')
+        photo = request.data.get('photo')
+        upload = request.FILES['photo']
+        fss = FileSystemStorage()
+        file = fss.save(upload.name, upload)
+        tellme = TellMe.objects.create(
+            data_time=data_time,
+            place=place,
+            accident=accident,
+            photo=file,
+            driver_id=driver_id,
+            user_id=user_id,
+        ).save()
+        res = {
+            'status': 1,
+            'msg': 'self tellme',
+        }
+        return Response(res)
+    except KeyError:
+        res = {
+            'status': 0,
+            'msg': 'error'
+        }
+        return Response(res)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def tell_us(request):
+    try:
+        massage = request.data.get('massage')
+        driver_id = request.data.get('driver_id')
+        user_id = request.data.get('user_id')
+        tell_us = TellMe.objects.create(
+            massage=massage,
+            driver_id=driver_id,
+            user_id=user_id,
+        ).save()
+        res = {
+            'status': 1,
+            'msg': 'self tell_us',
+        }
+        return Response(res)
+    except KeyError:
+        res = {
+            'status': 0,
+            'msg': 'error'
+        }
+        return Response(res)

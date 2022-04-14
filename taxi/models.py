@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
+from django.contrib.gis.geos import Point
+from django.contrib.gis.db import models as goe_models
 
 def get_avatar(instance, filename):
     return "users/%s" % (filename)
@@ -17,10 +18,9 @@ class CustomUser(AbstractUser):
     longitude = models.FloatField(default=0)
     latitude = models.FloatField(default=0)
 
-from django.contrib.gis.geos import Point
-from django.contrib.gis.db import models as goe_models
 
-point = goe_models.PointField(null=True, spatial_index=True, geography=True, blank=True)
+# point = goe_models.PointField(null=True, spatial_index=True, geography=True, blank=True)
+
 
 class Company(models.Model):
     point = goe_models.PointField(null=True, spatial_index=True, geography=True, blank=True)
@@ -40,4 +40,6 @@ class Company(models.Model):
             self.point = Point(float(self.longitude), float(self.latitude), srid=4326)
 
         super(Company, self).save(*args, **kwargs)
+
+
 

@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 import os
 from datetime import timedelta
-from pathlib import Path
+# from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 
@@ -98,7 +98,7 @@ WSGI_APPLICATION = 'Taxi_Kit.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'taxi',
+        'NAME': 'taxikit',
         'USER': 'postgres',
         'PASSWORD': '123',
         'HOST': '127.0.0.1',
@@ -216,3 +216,10 @@ CHANNEL_LAYERS = {
 }
 
 ASGI_APPLICATION = "Taxi_Kit.asgi.application"
+
+# Payment nastroyka
+CLICK_SETTINGS = {
+    'service_id': 1,
+    'secret_key': 22,
+    'merchant_id': 123,
+}

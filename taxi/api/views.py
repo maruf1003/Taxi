@@ -15,13 +15,14 @@ jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER  # token uchun
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 
 
-
 def send_sms(mail, text):
-    email = EmailMessage('Veri', text,from_email="marufkulmatov10@gmail.com", to=[mail])
+    email = EmailMessage('Veri', text, from_email="marufkulmatov10@gmail.com", to=[mail])
     email.send()
+
+
 # User log in (avtorizatsiya 1-martta royxatdan otganda)
 @api_view(['POST'])
-@permission_classes([AllowAny, ])
+@permission_classes([AllowAny])
 def save_register(request):
     try:
         username = request.data.get('username')
@@ -74,6 +75,7 @@ def save_register(request):
             'msg': 'Please set all reqiured fields'
         }
         return Response(res)
+
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
@@ -194,19 +196,3 @@ def update_password(request):
 
     return Response(res)
 
-# @api_view(["GET"])
-# @permission_classes([IsAuthenticated])    # zakazdan song xaydovchining dannylarini korado
-# def driver_view(request):
-#     user_id = request.GET.get("user_id")
-#     user = CustomUser.objects.filter(pk=user_id).first()
-#     if user:
-#         res = {
-#             "status": 1,
-#             "user": User_driverSerializer(user, many=False).data,
-#         }
-#     else:
-#         res = {
-#             "status": 0,
-#             "msg": "Key error"
-#         }
-#     return Response(res)
