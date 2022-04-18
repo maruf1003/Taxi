@@ -13,13 +13,16 @@ class DriverViewSet(mixins.ListModelMixin,
     serializer_class = DriverSerializers
 
 
-# class TellMeViewSet(mixins.ListModelMixin,
-#                     mixins.RetrieveModelMixin,
-#                     viewsets.GenericViewSet):
-#     queryset = TellMe.objects.all()
-#     serializer_class = TellMeSerializer
-#
-#
+class TellMeViewSet(mixins.ListModelMixin,
+                    mixins.RetrieveModelMixin,
+                    viewsets.GenericViewSet):
+    queryset = TellMeType.objects.all()
+    serializer_class = TellMeTypeSerializer
+
+
+
+
+
 # class ILeftMeViewSet(mixins.ListModelMixin,
 #                      mixins.RetrieveModelMixin,
 #                      viewsets.GenericViewSet):

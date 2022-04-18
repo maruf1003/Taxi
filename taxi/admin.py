@@ -4,6 +4,8 @@ from taxi.models import *
 # Register your models here.
 
 admin.site.register(CustomUser)  # User
+admin.site.register(Faq)
+admin.site.register(FaqCategory)
 from django.contrib.gis.admin import OSMGeoAdmin
 
 class CompanyAdmin(OSMGeoAdmin):

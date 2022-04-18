@@ -99,18 +99,20 @@ def tell_me(request):
         place = request.data.get('place')
         accident = request.data.get('accident')
         driver_id = request.data.get('driver_id')
-        user_id = request.data.get('user_id')
-        photo = request.data.get('photo')
         upload = request.FILES['photo']
+        select = request.data.get['select']
         fss = FileSystemStorage()
         file = fss.save(upload.name, upload)
         tellme = TellMe.objects.create(
             data_time=data_time,
             place=place,
             accident=accident,
-            photo=file,
+            photo=upload,
+            file=file,
+            select=select,
             driver_id=driver_id,
-            user_id=user_id,
+            user=request.user
+
         ).save()
         res = {
             'status': 1,
@@ -131,17 +133,18 @@ def tell_us(request):
     try:
         massage = request.data.get('massage')
         driver_id = request.data.get('driver_id')
-        user_id = request.data.get('user_id')
-        tell_us = TellMe.objects.create(
-            massage=massage,
-            driver_id=driver_id,
-            user_id=user_id,
-        ).save()
-        res = {
-            'status': 1,
-            'msg': 'self tell_us',
-        }
-        return Response(res)
+        user = CustomUser.objects.filter(id=request.user.id).first()
+        if user:
+            tell_us = TellMe.objects.create(
+                massage=massage,
+                driver_id=driver_id,
+                user=request.user
+            ).save()
+            res = {
+                'status': 1,
+                'msg': 'self tell_us',
+            }
+            return Response(res)
     except KeyError:
         res = {
             'status': 0,

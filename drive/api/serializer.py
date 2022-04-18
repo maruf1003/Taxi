@@ -54,14 +54,10 @@ class ClickUzSerializer(serializers.Serializer):
 
 # TellMe
 
-# class TellMeSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = TellMe
-#         fields = "__all__"
-#
-#
-# # I  left an item
-# class ILeftSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = TellMe
-#         fields = ['massage']
+class TellMeTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TellMeType
+        fields = ['text', 'name']
+
+
+

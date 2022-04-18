@@ -89,17 +89,17 @@ class TellMeType(models.Model):
     name = models.CharField(max_length=100, null=False, default='')
     text = models.CharField(max_length=255,default='', null=True)
 
-    def __str__(self):
-        return self.name
+    # def __str__(self):
+    #     return self.name
 
 
 class TellMe(models.Model):
-    massage = models.CharField(max_length=255, default='', blank=True)
+    massage = models.CharField(max_length=255, default='', blank=True, null=True)
     data_time = models.DateTimeField(blank=True, null=True)
     place = models.CharField(max_length=110, default='', blank=True)
     accident = models.CharField(max_length=110, default='', blank=True)
     photo = models.ImageField(default='', blank=True)
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE, null=False, default='')
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=False, default='')
-    tell_me_typ = models.ForeignKey(TellMeType, on_delete=models.CASCADE, blank=True)
-    select = models.BooleanField(blank=True, default=False)
+    tell_me_typ = models.ForeignKey(TellMeType, on_delete=models.CASCADE,null=True, blank=True)
+    select = models.BooleanField(blank=True, default=True)

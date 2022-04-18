@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db import models as goe_models
 
+
 def get_avatar(instance, filename):
     return "users/%s" % (filename)
 
@@ -17,6 +18,7 @@ class CustomUser(AbstractUser):
     complete = models.IntegerField(default=0)
     longitude = models.FloatField(default=0)
     latitude = models.FloatField(default=0)
+    # mobile_phone = models.CharField(max_length=100, default='', null=True)
 
 
 # point = goe_models.PointField(null=True, spatial_index=True, geography=True, blank=True)
@@ -42,4 +44,13 @@ class Company(models.Model):
         super(Company, self).save(*args, **kwargs)
 
 
+class FaqCategory(models.Model):
+    name = models.CharField(max_length=200, default='', null=False)
+    order = models.IntegerField(default=0)
 
+
+class Faq(models.Model):
+    title = models.CharField(max_length=200, default='', null=False)
+    desc = models.CharField(max_length=255, default='', null=True)
+    status = models.IntegerField(default=0)
+    faqCategory = models.ForeignKey(FaqCategory, on_delete=models.CASCADE, null=True, blank=True)
